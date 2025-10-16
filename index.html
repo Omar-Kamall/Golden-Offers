@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Special Offers</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+        deleteDoc,
+        doc,
+        onSnapshot,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      // Firebase configuration - Your actual config
+      const firebaseConfig = {
+        apiKey: "AIzaSyA_xodw1a8Hhh9WIMs6vXYSFCF37YrLLeY",
+        authDomain: "golden-offers.firebaseapp.com",
+        projectId: "golden-offers",
+        storageBucket: "golden-offers.firebasestorage.app",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:d775873b1feb31fe8ec8c8",
+        measurementId: "G-G39Y002T15",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // Make Firebase functions globally available
+      window.firebaseDB = db;
+      window.firebaseCollection = collection;
+      window.firebaseAddDoc = addDoc;
+      window.firebaseGetDocs = getDocs;
+      window.firebaseDeleteDoc = deleteDoc;
+      window.firebaseDoc = doc;
+      window.firebaseOnSnapshot = onSnapshot;
+    </script>
+
+    <style>
+      body {
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+        background-color: white;
+      }
+
+      .gold-text {
+        color: #c9a048;
+      }
+
+      .gold-bg {
+        background-color: #c9a048;
+      }
+
+      .gray-text {
+        color: #6e6e6e;
+      }
+
+      .beige-bg {
+        background-color: #f5f0e8;
+      }
+
+      .nav-white {
+        background-color: white;
+      }
+
+      .nav-text {
+        color: #333333;
+      }
+
+      .hover-gold:hover {
+        background-color: #b8934a;
+      }
+
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(201, 160, 72, 0.1);
+      }
+
+      .sticky-nav {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+
+      /* Floating rectangles animation */
+      .floating-rect {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .floating-rect:nth-child(1) {
+        animation-delay: 0s;
+        animation-duration: 8s;
+      }
+
+      .floating-rect:nth-child(2) {
+        animation-delay: 1s;
+        animation-duration: 7s;
+      }
+
+      .floating-rect:nth-child(3) {
+        animation-delay: 2s;
+        animation-duration: 9s;
+      }
+
+      .floating-rect:nth-child(4) {
+        animation-delay: 3s;
+        animation-duration: 6s;
+      }
+
+      .floating-rect:nth-child(5) {
+        animation-delay: 4s;
+        animation-duration: 10s;
+      }
+
+      .floating-rect:nth-child(6) {
+        animation-delay: 5s;
+        animation-duration: 8s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) translateX(0px) rotate(0deg);
+        }
+        25% {
+          transform: translateY(-20px) translateX(10px) rotate(2deg);
+        }
+        50% {
+          transform: translateY(-10px) translateX(-15px) rotate(-1deg);
+        }
+        75% {
+          transform: translateY(-25px) translateX(5px) rotate(1deg);
+        }
+      }
+
+      /* Button pulse animation */
+      .pulse-button {
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      /* Hide sections initially */
+      .page-section {
+        display: none;
+      }
+
+      .page-section.active {
+        display: block;
+      }
+
+      /* Form validation styles */
+      .error {
+        border-color: #ef4444;
+      }
+
+      .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HOME PAGE -->
+    <div id="home-page" class="page-section active">
+      <!-- Navbar -->
+      <nav class="nav-white sticky-nav shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center h-16">
+            <!-- Brand Logo -->
+            <div class="flex-shrink-0">
+              <h1 class="text-2xl font-bold gold-text" id="brand-name">
+                Golden Offers
+              </h1>
+            </div>
+
+            <!-- Language Selector -->
+            <div class="flex items-center space-x-4">
+              <select
+                id="language-selector"
+                onchange="changeLanguage()"
+                class="nav-text bg-white border border-gray-300 rounded px-2 py-1 text-sm"
+              >
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+                <option value="fr">Français</option>
+              </select>
+
+              <!-- Navigation Links -->
+              <div class="hidden md:block">
+                <div class="flex items-center space-x-8">
+                  <a
+                    href="#"
+                    class="nav-text hover:text-[#C9A048] px-3 py-2 text-sm font-medium transition-colors duration-200"
+                    id="nav-home"
+                    >Home</a
+                  >
+                  <a
+                    href="#offers"
+                    class="nav-text hover:text-[#C9A048] px-3 py-2 text-sm font-medium transition-colors duration-200"
+                    id="nav-offers"
+                    >Offers</a
+                  >
+                  <button
+                    onclick="showLogin()"
+                    class="nav-text hover:text-[#C9A048] px-3 py-2 text-sm font-medium transition-colors duration-200"
+                    id="nav-login"
+                  >
+                    Login
+                  </button>
+                </div>
+              </div>
+
+              <!-- Mobile menu button -->
+              <div class="md:hidden">
+                <button
+                  onclick="toggleMobileMenu()"
+                  class="nav-text hover:text-[#C9A048] p-2"
+                >
+                  <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile menu -->
+          <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+              <a
+                href="#"
+                class="nav-text hover:text-[#C9A048] block px-3 py-2 text-base font-medium"
+                id="mobile-nav-home"
+                >Home</a
+              >
+              <a
+                href="#offers"
+                class="nav-text hover:text-[#C9A048] block px-3 py-2 text-base font-medium"
+                id="mobile-nav-offers"
+                >Offers</a
+              >
+              <button
+                onclick="showLogin()"
+                class="nav-text hover:text-[#C9A048] block px-3 py-2 text-base font-medium"
+                id="mobile-nav-login"
+              >
+                Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Hero Section -->
+      <section
+        class="py-[100px] px-4 text-center relative overflow-hidden"
+        style="background-color: #f5f0e8"
+      >
+        <!-- Decorative rectangles -->
+        <div
+          class="floating-rect absolute top-10 left-10 w-20 h-20 rounded-lg opacity-30"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute top-32 right-16 w-16 h-16 rounded-lg opacity-20"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute bottom-20 left-20 w-24 h-12 rounded-lg opacity-25"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute bottom-32 right-10 w-12 h-24 rounded-lg opacity-30"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute top-20 left-1/3 w-8 h-32 rounded-lg opacity-15"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute bottom-10 right-1/4 w-32 h-8 rounded-lg opacity-20"
+          style="background-color: #c9a048"
+        ></div>
+
+        <div class="max-w-4xl mx-auto relative z-10">
+          <h1
+            class="text-4xl md:text-6xl font-bold gold-text mb-6"
+            id="hero-title"
+          >
+            Amazing Offers Await You
+          </h1>
+          <p
+            class="text-xl md:text-2xl gray-text mb-8 leading-relaxed"
+            id="hero-subtitle"
+          >
+            Discover the best free marketing offers today
+          </p>
+          <button
+            onclick="scrollToOffers()"
+            class="gold-bg hover-gold text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+            id="hero-button"
+          >
+            Get Started
+          </button>
+        </div>
+      </section>
+
+      <!-- Offers Grid Section -->
+      <section
+        id="offers"
+        class="py-16 px-4 relative overflow-hidden"
+        style="background-color: #f5f0e8"
+      >
+        <!-- Decorative rectangles -->
+        <div
+          class="floating-rect absolute top-8 right-8 w-16 h-16 rounded-lg opacity-25"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute top-24 left-12 w-12 h-28 rounded-lg opacity-20"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute bottom-16 right-16 w-28 h-12 rounded-lg opacity-30"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute bottom-8 left-8 w-20 h-20 rounded-lg opacity-15"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute top-1/2 right-4 w-8 h-24 rounded-lg opacity-20"
+          style="background-color: #c9a048"
+        ></div>
+
+        <div class="max-w-6xl mx-auto relative z-10">
+          <div id="home-offers-grid" class="grid md:grid-cols-2 gap-8">
+            <!-- Dynamic offers will be loaded here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="beige-bg py-8 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+          <p class="gray-text text-sm mb-2" id="footer-copyright">
+            © 2025 All rights reserved
+          </p>
+          <a
+            href="#terms"
+            onclick="showTerms()"
+            class="gray-text hover:text-[#C9A048] text-sm underline transition-colors duration-200"
+            id="footer-terms"
+            >Terms and Conditions</a
+          >
+        </div>
+      </footer>
+    </div>
+
+    <!-- LOGIN PAGE -->
+    <div id="login-page" class="page-section">
+      <!-- Navbar -->
+      <nav class="nav-white sticky-nav shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center h-16">
+            <div class="flex-shrink-0">
+              <h1 class="text-2xl font-bold gold-text">Golden Offers</h1>
+            </div>
+            <button
+              onclick="showHome()"
+              class="nav-text hover:text-[#C9A048] px-3 py-2 text-sm font-medium transition-colors duration-200"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Login Form Section -->
+      <section
+        class="py-20 px-4 relative overflow-hidden h-screen"
+        style="background-color: #f5f0e8"
+      >
+        <!-- Decorative rectangles -->
+        <div
+          class="floating-rect absolute top-10 left-10 w-20 h-20 rounded-lg opacity-30"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute top-32 right-16 w-16 h-16 rounded-lg opacity-20"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute bottom-20 left-20 w-24 h-12 rounded-lg opacity-25"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute bottom-32 right-10 w-12 h-24 rounded-lg opacity-30"
+          style="background-color: #c9a048"
+        ></div>
+
+        <div class="max-w-md mx-auto relative z-10">
+          <div class="bg-white rounded-xl p-8 card-shadow">
+            <h2 class="text-3xl font-bold gold-text text-center mb-8">Login</h2>
+            <form id="login-form" onsubmit="handleLogin(event)">
+              <div class="mb-6">
+                <label
+                  for="username"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  >Username</label
+                >
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A048] focus:border-transparent"
+                  required
+                />
+                <div id="username-error" class="error-message hidden">
+                  Please enter a username
+                </div>
+              </div>
+              <div class="mb-6">
+                <label
+                  for="password"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  >Password</label
+                >
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A048] focus:border-transparent"
+                  required
+                />
+                <div id="password-error" class="error-message hidden">
+                  Please enter a password
+                </div>
+              </div>
+              <button
+                type="submit"
+                class="w-full gold-bg hover-gold text-white py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
+              >
+                Login
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="dashboard-page" class="page-section">
+      <!-- Navbar -->
+      <nav class="nav-white sticky-nav shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center h-16">
+            <div class="flex-shrink-0">
+              <h1 class="text-2xl font-bold gold-text">لوحة التحكم</h1>
+            </div>
+            <button
+              onclick="logout()"
+              class="nav-text hover:text-[#C9A048] px-3 py-2 text-sm font-medium transition-colors duration-200"
+            >
+              تسجيل الخروج
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Dashboard Content -->
+      <section
+        class="py-20 px-4 relative overflow-hidden"
+        style="background-color: #f5f0e8"
+      >
+        <!-- Decorative rectangles -->
+        <div
+          class="floating-rect absolute top-10 left-10 w-20 h-20 rounded-lg opacity-30"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute top-32 right-16 w-16 h-16 rounded-lg opacity-20"
+          style="background-color: #c9a048"
+        ></div>
+        <div
+          class="floating-rect absolute bottom-20 left-20 w-24 h-12 rounded-lg opacity-25"
+          style="background-color: #c9a048"
+        ></div>
+
+        <div class="max-w-4xl mx-auto relative z-10">
+
+          <!-- Form Section -->
+          <div class="bg-white rounded-xl p-8 card-shadow mb-8">
+            <h2 class="text-3xl font-bold gold-text text-center mb-8">
+              إضافة عرض جديد
+            </h2>
+            <form id="offer-form" onsubmit="addOffer(event)">
+              <div class="grid md:grid-cols-3 gap-6 mb-6">
+                <div>
+                  <label
+                    for="offer-image"
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    >صورة العرض</label
+                  >
+                  <input
+                    type="file"
+                    id="offer-image"
+                    accept="image/*"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A048] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#C9A048] file:text-white hover:file:bg-[#B8934A]"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="offer-link"
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    >رابط العرض</label
+                  >
+                  <input
+                    type="url"
+                    id="offer-link"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A048]"
+                    placeholder="https://example.com"
+                  />
+                </div>
+                <div class="col-span-3">
+                  <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                    تفاصيل الكارت بالثلاث لغات
+                  </h3>
+                  <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <label
+                        for="offer-details-ar"
+                        class="block text-sm font-medium text-gray-700 mb-2"
+                        >التفاصيل بالعربية</label
+                      >
+                      <textarea
+                        id="offer-details-ar"
+                        rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A048] resize-none"
+                        placeholder="اكتب تفاصيل العرض بالعربية..."
+                      ></textarea>
+                    </div>
+                    <div>
+                      <label
+                        for="offer-details-en"
+                        class="block text-sm font-medium text-gray-700 mb-2"
+                        >Details in English</label
+                      >
+                      <textarea
+                        id="offer-details-en"
+                        rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A048] resize-none"
+                        placeholder="Write offer details in English..."
+                      ></textarea>
+                    </div>
+                    <div>
+                      <label
+                        for="offer-details-fr"
+                        class="block text-sm font-medium text-gray-700 mb-2"
+                        >Détails en Français</label
+                      >
+                      <textarea
+                        id="offer-details-fr"
+                        rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A048] resize-none"
+                        placeholder="Écrivez les détails de l'offre en français..."
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="grid md:grid-cols-3 gap-6 mb-6">
+                <div>
+                  <label
+                    for="offer-title-ar"
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    >العنوان بالعربية</label
+                  >
+                  <input
+                    type="text"
+                    id="offer-title-ar"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A048]"
+                    placeholder="العنوان باللغة العربية"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    for="offer-title-en"
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    >English Title</label
+                  >
+                  <input
+                    type="text"
+                    id="offer-title-en"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A048]"
+                    placeholder="Title in English"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    for="offer-title-fr"
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    >Titre Français</label
+                  >
+                  <input
+                    type="text"
+                    id="offer-title-fr"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A048]"
+                    placeholder="Titre en français"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="text-center">
+                <button
+                  type="submit"
+                  class="gold-bg hover-gold text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
+                >
+                  إضافة العرض
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Offers Display -->
+          <div id="dashboard-offers" class="grid md:grid-cols-2 gap-8">
+            <!-- Default offers will be displayed here -->
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // Language translations
+      const translations = {
+        en: {
+          brandName: "Golden Offers",
+          navHome: "Home",
+          navOffers: "Offers",
+          navLogin: "Login",
+          heroTitle: "Amazing Offers Await You",
+          heroSubtitle: "Discover the best free marketing offers today",
+          heroButton: "Get Started",
+          offer1Title: "First Offer - Free Guide!",
+          offer1Desc:
+            "Get a comprehensive guide containing the best proven and effective marketing strategies to grow your business",
+          offer1Button: "Get Offer Now",
+          offer2Title: "Second Offer - Free Course!",
+          offer2Desc:
+            "Complete training course in digital marketing with certified certificate, including all basics and advanced techniques",
+          offer2Button: "Get Offer Now",
+          footerCopyright: "© 2025 All rights reserved",
+          footerTerms: "Terms and Conditions",
+        },
+        ar: {
+          brandName: "العروض الذهبية",
+          navHome: "الرئيسية",
+          navOffers: "العروض",
+          navLogin: "تسجيل الدخول",
+          heroTitle: "عروض مميزة بانتظارك",
+          heroSubtitle: "اكتشف أفضل العروض التسويقية المجانية اليوم",
+          heroButton: "ابدأ الآن",
+          offer1Title: "العرض الأول – دليل مجاني!",
+          offer1Desc:
+            "احصل على دليل شامل يحتوي على أفضل الاستراتيجيات التسويقية المجربة والفعالة لتنمية أعمالك",
+          offer1Button: "احصل على العرض الآن",
+          offer2Title: "العرض الثاني – كورس مجاني!",
+          offer2Desc:
+            "كورس تدريبي متكامل في التسويق الرقمي مع شهادة معتمدة، يشمل جميع الأساسيات والتقنيات المتقدمة",
+          offer2Button: "احصل على العرض الآن",
+          footerCopyright: "© 2025 جميع الحقوق محفوظة",
+          footerTerms: "الشروط والأحكام",
+        },
+        fr: {
+          brandName: "Offres Dorées",
+          navHome: "Accueil",
+          navOffers: "Offres",
+          navLogin: "Connexion",
+          heroTitle: "Des Offres Incroyables Vous Attendent",
+          heroSubtitle:
+            "Découvrez les meilleures offres marketing gratuites aujourd'hui",
+          heroButton: "Commencer",
+          offer1Title: "Première Offre - Guide Gratuit!",
+          offer1Desc:
+            "Obtenez un guide complet contenant les meilleures stratégies marketing éprouvées et efficaces pour développer votre entreprise",
+          offer1Button: "Obtenir l'Offre Maintenant",
+          offer2Title: "Deuxième Offre - Cours Gratuit!",
+          offer2Desc:
+            "Cours de formation complet en marketing numérique avec certificat certifié, incluant toutes les bases et techniques avancées",
+          offer2Button: "Obtenir l'Offre Maintenant",
+          footerCopyright: "© 2025 Tous droits réservés",
+          footerTerms: "Termes et Conditions",
+        },
+      };
+
+      // Initialize language from localStorage or default to English
+      let currentLanguage = localStorage.getItem("selectedLanguage") || "en";
+
+      // Set initial language and setup real-time updates
+      document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("language-selector").value = currentLanguage;
+        applyLanguage(currentLanguage);
+        loadDashboardOffers();
+
+        // Setup real-time listener for offers
+        try {
+          window.firebaseOnSnapshot(
+            window.firebaseCollection(window.firebaseDB, "offers"),
+            (snapshot) => {
+              dashboardOffers = [];
+              snapshot.forEach((doc) => {
+                dashboardOffers.push({
+                  id: doc.id,
+                  ...doc.data(),
+                });
+              });
+
+              // Sort by creation date (newest first)
+              dashboardOffers.sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+              );
+
+              // Update displays if we're on the dashboard page
+              const dashboardPage = document.getElementById("dashboard-page");
+              if (dashboardPage.classList.contains("active")) {
+                displayDashboardOffers();
+              }
+
+              // Always update home page offers
+              loadHomeOffers();
+            }
+          );
+        } catch (error) {
+          console.error("Error setting up real-time listener:", error);
+          // Fallback to manual loading
+          loadDashboardOffers();
+        }
+      });
+
+      // Language functions
+      function changeLanguage() {
+        const selector = document.getElementById("language-selector");
+        currentLanguage = selector.value;
+        localStorage.setItem("selectedLanguage", currentLanguage);
+        applyLanguage(currentLanguage);
+
+        // Update HTML direction for Arabic
+        if (currentLanguage === "ar") {
+          document.documentElement.setAttribute("dir", "rtl");
+          document.documentElement.setAttribute("lang", "ar");
+        } else {
+          document.documentElement.setAttribute("dir", "ltr");
+          document.documentElement.setAttribute("lang", currentLanguage);
+        }
+      }
+
+      function applyLanguage(lang) {
+        const t = translations[lang];
+
+        // Update all translatable elements
+        document.getElementById("brand-name").textContent = t.brandName;
+        document.getElementById("nav-home").textContent = t.navHome;
+        document.getElementById("nav-offers").textContent = t.navOffers;
+        document.getElementById("nav-login").textContent = t.navLogin;
+        document.getElementById("mobile-nav-home").textContent = t.navHome;
+        document.getElementById("mobile-nav-offers").textContent = t.navOffers;
+        document.getElementById("mobile-nav-login").textContent = t.navLogin;
+        document.getElementById("hero-title").textContent = t.heroTitle;
+        document.getElementById("hero-subtitle").textContent = t.heroSubtitle;
+        document.getElementById("hero-button").textContent = t.heroButton;
+        document.getElementById("footer-copyright").textContent =
+          t.footerCopyright;
+        document.getElementById("footer-terms").textContent = t.footerTerms;
+
+        // Refresh home offers to show in new language
+        loadHomeOffers();
+      }
+
+      // Navigation functions
+      function toggleMobileMenu() {
+        const menu = document.getElementById("mobile-menu");
+        menu.classList.toggle("hidden");
+      }
+
+      function scrollToOffers() {
+        document.getElementById("offers").scrollIntoView({
+          behavior: "smooth",
+        });
+      }
+
+      function showHome() {
+        hideAllPages();
+        document.getElementById("home-page").classList.add("active");
+      }
+
+      function showLogin() {
+        hideAllPages();
+        document.getElementById("login-page").classList.add("active");
+      }
+
+      function showDashboard() {
+        hideAllPages();
+        document.getElementById("dashboard-page").classList.add("active");
+        loadDashboardOffers();
+      }
+
+      function hideAllPages() {
+        document.querySelectorAll(".page-section").forEach((page) => {
+          page.classList.remove("active");
+        });
+      }
+
+      // Login functionality
+      function handleLogin(event) {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        // Clear previous errors
+        clearErrors();
+
+        let hasError = false;
+
+        // Validation
+        if (!username) {
+          showError("username", "Please enter a username");
+          hasError = true;
+        }
+
+        if (!password) {
+          showError("password", "Please enter a password");
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        // Simple authentication (in real app, this would be server-side)
+        if (username.toLowerCase() === "toumi" && password.toLowerCase() === "toumi") {
+          localStorage.setItem("isLoggedIn", "true");
+          showDashboard();
+        } else {
+          showError("password", "Invalid username or password");
+        }
+      }
+
+      function showError(fieldId, message) {
+        const field = document.getElementById(fieldId);
+        const errorDiv = document.getElementById(fieldId + "-error");
+
+        field.classList.add("error");
+        errorDiv.textContent = message;
+        errorDiv.classList.remove("hidden");
+      }
+
+      function clearErrors() {
+        document.querySelectorAll(".error").forEach((field) => {
+          field.classList.remove("error");
+        });
+        document.querySelectorAll(".error-message").forEach((error) => {
+          error.classList.add("hidden");
+        });
+      }
+
+      function logout() {
+        localStorage.removeItem("isLoggedIn");
+        showHome();
+      }
+
+      // Dashboard functionality
+      let dashboardOffers = [];
+
+      async function addOffer(event) {
+        event.preventDefault();
+
+        const imageFile = document.getElementById("offer-image").files[0];
+        const offerLink = document.getElementById("offer-link").value.trim();
+        const detailsAr = document
+          .getElementById("offer-details-ar")
+          .value.trim();
+        const detailsEn = document
+          .getElementById("offer-details-en")
+          .value.trim();
+        const detailsFr = document
+          .getElementById("offer-details-fr")
+          .value.trim();
+        const titleAr = document.getElementById("offer-title-ar").value.trim();
+        const titleEn = document.getElementById("offer-title-en").value.trim();
+        const titleFr = document.getElementById("offer-title-fr").value.trim();
+
+        // Show loading state
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "جاري الحفظ...";
+        submitBtn.disabled = true;
+
+        try {
+          // Convert image to base64 if provided
+          if (imageFile) {
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+              const newOffer = {
+                imageUrl: e.target.result, // base64 data URL
+                link: offerLink || "#",
+                details: {
+                  ar: detailsAr,
+                  en: detailsEn,
+                  fr: detailsFr,
+                },
+                titles: {
+                  ar: titleAr,
+                  en: titleEn,
+                  fr: titleFr,
+                },
+                buttonTexts: {
+                  ar: "احصل على العرض الآن",
+                  en: "Get Offer Now",
+                  fr: "Obtenir l'Offre Maintenant",
+                },
+                createdAt: new Date().toISOString(),
+              };
+
+              // Add to Firebase
+              await window.firebaseAddDoc(
+                window.firebaseCollection(window.firebaseDB, "offers"),
+                newOffer
+              );
+
+              // Clear form
+              document.getElementById("offer-form").reset();
+
+              // Reset button
+              submitBtn.textContent = originalText;
+              submitBtn.disabled = false;
+
+              // Show success message
+              showSuccessMessage("تم إضافة العرض بنجاح!");
+            };
+            reader.readAsDataURL(imageFile);
+          } else {
+            // No image provided
+            const newOffer = {
+              imageUrl: null,
+              link: offerLink || "#",
+              details: {
+                ar: detailsAr,
+                en: detailsEn,
+                fr: detailsFr,
+              },
+              titles: {
+                ar: titleAr,
+                en: titleEn,
+                fr: titleFr,
+              },
+              buttonTexts: {
+                ar: "احصل على العرض الآن",
+                en: "Get Offer Now",
+                fr: "Obtenir l'Offre Maintenant",
+              },
+              createdAt: new Date().toISOString(),
+            };
+
+            // Add to Firebase
+            await window.firebaseAddDoc(
+              window.firebaseCollection(window.firebaseDB, "offers"),
+              newOffer
+            );
+
+            // Clear form
+            document.getElementById("offer-form").reset();
+
+            // Reset button
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+
+            // Show success message
+            showSuccessMessage("تم إضافة العرض بنجاح!");
+          }
+        } catch (error) {
+          console.error("Error adding offer:", error);
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+          showErrorMessage(
+            "حدث خطأ أثناء إضافة العرض. تأكد من إعدادات Firebase."
+          );
+        }
+      }
+
+      async function loadDashboardOffers() {
+        try {
+          const querySnapshot = await window.firebaseGetDocs(
+            window.firebaseCollection(window.firebaseDB, "offers")
+          );
+          dashboardOffers = [];
+          querySnapshot.forEach((doc) => {
+            dashboardOffers.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          });
+
+          // Sort by creation date (newest first)
+          dashboardOffers.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+
+          displayDashboardOffers();
+          loadHomeOffers(); // Update home page offers too
+        } catch (error) {
+          console.error("Error loading offers:", error);
+          // Fallback to localStorage if Firebase fails
+          const savedOffers = localStorage.getItem("dashboardOffers");
+          if (savedOffers) {
+            dashboardOffers = JSON.parse(savedOffers);
+            displayDashboardOffers();
+          }
+          showErrorMessage(
+            "تعذر تحميل العروض من Firebase. تأكد من الاتصال بالإنترنت."
+          );
+        }
+      }
+
+      function displayDashboardOffers() {
+        const container = document.getElementById("dashboard-offers");
+
+        if (dashboardOffers.length === 0) {
+          container.innerHTML = `
+                    <div class="col-span-2 text-center py-8">
+                        <p class="text-gray-500 text-lg">لا توجد عروض حتى الآن</p>
+                        <p class="text-gray-400">استخدم النموذج أعلاه لإضافة عروض جديدة</p>
+                    </div>
+                `;
+          return;
+        }
+
+        container.innerHTML = dashboardOffers
+          .map(
+            (offer) => `
+                <div class="bg-white rounded-xl p-8 card-shadow hover:shadow-xl transition-shadow duration-300">
+                    <div class="mb-6">
+                        ${
+                          offer.imageUrl
+                            ? `<img src="${offer.imageUrl}" class="w-full rounded" alt="${
+                                offer.titles ? offer.titles.ar : offer.title
+                              }" class="w-20 h-20 mx-auto object-cover rounded-lg" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                             <div class="w-20 h-20 mx-auto bg-[#D4AF37] rounded-lg flex items-center justify-center" style="display: none;">
+                                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                </svg>
+                             </div>`
+                            : `<div class="w-20 h-20 mx-auto bg-[#D4AF37] rounded-lg flex items-center justify-center">
+                                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                </svg>
+                             </div>`
+                        }
+                    </div>
+                    <h3 class="text-2xl font-bold text-[#D4AF37] mb-4 text-center">${
+                      offer.titles ? offer.titles.ar : offer.title
+                    }</h3>
+                    ${
+                      offer.details && offer.details.ar
+                        ? `<p class="text-gray-600 text-center mb-4 leading-relaxed">${offer.details.ar}</p>`
+                        : offer.details && typeof offer.details === "string"
+                        ? `<p class="text-gray-600 text-center mb-4 leading-relaxed">${offer.details}</p>`
+                        : ""
+                    }
+                    ${
+                      offer.titles
+                        ? `
+                        <div class="text-sm text-gray-500 mb-4 text-center space-y-1">
+                            <p><strong>EN:</strong> ${offer.titles.en}</p>
+                            <p><strong>FR:</strong> ${offer.titles.fr}</p>
+                            ${
+                              offer.details && offer.details.en
+                                ? `<p><strong>Details EN:</strong> ${offer.details.en}</p>`
+                                : ""
+                            }
+                            ${
+                              offer.details && offer.details.fr
+                                ? `<p><strong>Détails FR:</strong> ${offer.details.fr}</p>`
+                                : ""
+                            }
+                        </div>
+                    `
+                        : `<p class="text-gray-600 text-center mb-6 leading-relaxed">${offer.description}</p>`
+                    }
+                    <div class="text-center">
+                        <button onclick="window.open('${
+                          offer.link
+                        }', '_blank')" class="pulse-button gold-bg hover-gold text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 mr-2">
+                            ${
+                              offer.buttonTexts
+                                ? offer.buttonTexts.ar
+                                : offer.buttonText
+                            }
+                        </button>
+                        <button onclick="deleteOffer('${
+                          offer.id
+                        }')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300">
+                            حذف
+                        </button>
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      async function deleteOffer(offerId) {
+        try {
+          // Delete from Firebase
+          await window.firebaseDeleteDoc(
+            window.firebaseDoc(window.firebaseDB, "offers", offerId)
+          );
+
+          // Remove from local array
+          dashboardOffers = dashboardOffers.filter(
+            (offer) => offer.id !== offerId
+          );
+
+          // Update displays
+          displayDashboardOffers();
+          loadHomeOffers(); // Update home page offers too
+
+          showSuccessMessage("تم حذف العرض بنجاح!");
+        } catch (error) {
+          console.error("Error deleting offer:", error);
+          showErrorMessage(
+            "حدث خطأ أثناء حذف العرض. تأكد من الاتصال بالإنترنت."
+          );
+        }
+      }
+
+      // Notification functions
+      function showSuccessMessage(message) {
+        showNotification(message, "success");
+      }
+
+      function showErrorMessage(message) {
+        showNotification(message, "error");
+      }
+
+      function showNotification(message, type) {
+        // Remove existing notifications
+        const existingNotifications =
+          document.querySelectorAll(".notification");
+        existingNotifications.forEach((notification) => notification.remove());
+
+        // Create notification element
+        const notification = document.createElement("div");
+        notification.className = `notification fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg text-white font-semibold transition-all duration-300 transform translate-x-full`;
+
+        if (type === "success") {
+          notification.classList.add("bg-green-500");
+        } else {
+          notification.classList.add("bg-red-500");
+        }
+
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        // Animate in
+        setTimeout(() => {
+          notification.classList.remove("translate-x-full");
+        }, 100);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+          notification.classList.add("translate-x-full");
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.remove();
+            }
+          }, 300);
+        }, 3000);
+      }
+
+      // Home page offers functionality
+      function loadHomeOffers() {
+        // Use the dashboardOffers array that's already loaded from Firebase
+        let allOffers = [...dashboardOffers];
+
+        // Add default offers if no custom offers exist
+        if (allOffers.length === 0) {
+          allOffers = getDefaultOffers();
+        }
+
+        displayHomeOffers(allOffers);
+      }
+
+      function getDefaultOffers() {
+        const t = translations[currentLanguage];
+        return [
+          {
+            id: "default1",
+            imageUrl: null,
+            link: "#",
+            title: t.offer1Title,
+            description: t.offer1Desc,
+            buttonText: t.offer1Button,
+            isDefault: true,
+          },
+          {
+            id: "default2",
+            imageUrl: null,
+            link: "#",
+            title: t.offer2Title,
+            description: t.offer2Desc,
+            buttonText: t.offer2Button,
+            isDefault: true,
+          },
+        ];
+      }
+
+      function displayHomeOffers(offers) {
+        const container = document.getElementById("home-offers-grid");
+
+        container.innerHTML = offers
+          .map((offer) => {
+            // Get title, description and button text based on current language
+            let displayTitle, displayDescription, displayButtonText;
+
+            if (offer.titles) {
+              // Custom offer with multi-language support
+              displayTitle = offer.titles[currentLanguage] || offer.titles.ar;
+              displayDescription =
+                offer.details && offer.details[currentLanguage]
+                  ? offer.details[currentLanguage]
+                  : offer.details && offer.details.ar
+                  ? offer.details.ar
+                  : "";
+              displayButtonText =
+                offer.buttonTexts[currentLanguage] || offer.buttonTexts.ar;
+            } else {
+              // Default offer
+              displayTitle = offer.title;
+              displayDescription = offer.description;
+              displayButtonText = offer.buttonText;
+            }
+
+            return `
+                <div class="bg-white rounded-xl p-8 card-shadow hover:shadow-xl transition-shadow duration-300">
+                    <div class="mb-6">
+                        ${
+                          offer.imageUrl
+                            ? `<img src="${offer.imageUrl}" alt="${displayTitle}" class="w-full mx-auto object-cover rounded-lg" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                             <div class="w-20 h-20 mx-auto bg-[#D4AF37] rounded-lg flex items-center justify-center" style="display: none;">
+                                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                </svg>
+                             </div>`
+                            : offer.isDefault
+                            ? `<svg class="w-20 h-20 mx-auto text-[#D4AF37]" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="${
+                                      offer.id === "default1"
+                                        ? "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+                                        : "M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"
+                                    }"/>
+                                </svg>`
+                            : `<div class="w-20 h-20 mx-auto bg-[#D4AF37] rounded-lg flex items-center justify-center">
+                                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                    </svg>
+                                </div>`
+                        }
+                    </div>
+                    <h3 class="text-2xl font-bold text-[#D4AF37] mb-4 text-center">${displayTitle}</h3>
+                    ${
+                      displayDescription
+                        ? `<p class="text-gray-600 text-center mb-6 leading-relaxed">${displayDescription}</p>`
+                        : ""
+                    }
+                    <div class="text-center">
+                        <button onclick="${
+                          offer.link === "#"
+                            ? `claimOffer('${displayTitle}')`
+                            : `window.open('${offer.link}', '_blank')`
+                        }" class="pulse-button gold-bg hover-gold text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105">
+                            ${displayButtonText}
+                        </button>
+                    </div>
+                </div>
+                `;
+          })
+          .join("");
+      }
+
+      // Offer claim functionality
+      function claimOffer(offerName) {
+        console.log(`Claimed offer: ${offerName}`);
+        // In a real application, this would send data to a server
+      }
+
+      function showTerms() {
+        console.log("Terms and conditions clicked");
+        // In a real application, this would show terms page
+      }
+
+      // Check login status on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        const isLoggedIn = localStorage.getItem("isLoggedIn");
+        if (isLoggedIn === "true") {
+          // User is logged in, but start on home page
+          showHome();
+        }
+      });
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'98f9b63a708a536e',t:'MTc2MDY0MDMxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
