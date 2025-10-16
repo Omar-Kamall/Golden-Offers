@@ -519,7 +519,6 @@
         ></div>
 
         <div class="max-w-4xl mx-auto relative z-10">
-
           <!-- Form Section -->
           <div class="bg-white rounded-xl p-8 card-shadow mb-8">
             <h2 class="text-3xl font-bold gold-text text-center mb-8">
@@ -869,7 +868,10 @@
         if (hasError) return;
 
         // Simple authentication (in real app, this would be server-side)
-        if (username.toLowerCase() === "toumi" && password.toLowerCase() === "toumi") {
+        if (
+          username.toLowerCase() === "toumi" &&
+          password.toLowerCase() === "toumi"
+        ) {
           localStorage.setItem("isLoggedIn", "true");
           showDashboard();
         } else {
@@ -903,6 +905,12 @@
       // Dashboard functionality
       let dashboardOffers = [];
 
+      // ✅ تحميل العروض أول ما الصفحة تفتح
+      document.addEventListener("DOMContentLoaded", async () => {
+        await fetchOffers();
+      });
+
+      // ✅ دالة إضافة عرض جديد
       async function addOffer(event) {
         event.preventDefault();
 
@@ -921,102 +929,137 @@
         const titleEn = document.getElementById("offer-title-en").value.trim();
         const titleFr = document.getElementById("offer-title-fr").value.trim();
 
-        // Show loading state
+        // ✅ زر التحميل
         const submitBtn = event.target.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.textContent = "جاري الحفظ...";
         submitBtn.disabled = true;
 
         try {
-          // Convert image to base64 if provided
+          // ✅ تحقق من وجود بيانات العرض لتفادي التكرار
+          if (!titleAr && !titleEn && !titleFr && !offerLink) {
+            showErrorMessage("الرجاء إدخال بيانات العرض قبل الحفظ!");
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
+          }
+
+          const newOffer = {
+            imageUrl: null,
+            link: offerLink || "#",
+            details: {
+              ar: detailsAr,
+              en: detailsEn,
+              fr: detailsFr,
+            },
+            titles: {
+              ar: titleAr,
+              en: titleEn,
+              fr: titleFr,
+            },
+            buttonTexts: {
+              ar: "احصل على العرض الآن",
+              en: "Get Offer Now",
+              fr: "Obtenir l'Offre Maintenant",
+            },
+            createdAt: new Date().toISOString(),
+          };
+
+          // ✅ لو الصورة موجودة نحولها Base64
           if (imageFile) {
             const reader = new FileReader();
             reader.onload = async function (e) {
-              const newOffer = {
-                imageUrl: e.target.result, // base64 data URL
-                link: offerLink || "#",
-                details: {
-                  ar: detailsAr,
-                  en: detailsEn,
-                  fr: detailsFr,
-                },
-                titles: {
-                  ar: titleAr,
-                  en: titleEn,
-                  fr: titleFr,
-                },
-                buttonTexts: {
-                  ar: "احصل على العرض الآن",
-                  en: "Get Offer Now",
-                  fr: "Obtenir l'Offre Maintenant",
-                },
-                createdAt: new Date().toISOString(),
-              };
+              newOffer.imageUrl = e.target.result;
 
-              // Add to Firebase
-              await window.firebaseAddDoc(
-                window.firebaseCollection(window.firebaseDB, "offers"),
-                newOffer
-              );
-
-              // Clear form
-              document.getElementById("offer-form").reset();
-
-              // Reset button
-              submitBtn.textContent = originalText;
-              submitBtn.disabled = false;
-
-              // Show success message
-              showSuccessMessage("تم إضافة العرض بنجاح!");
+              await saveOffer(newOffer, submitBtn, originalText);
             };
             reader.readAsDataURL(imageFile);
           } else {
-            // No image provided
-            const newOffer = {
-              imageUrl: null,
-              link: offerLink || "#",
-              details: {
-                ar: detailsAr,
-                en: detailsEn,
-                fr: detailsFr,
-              },
-              titles: {
-                ar: titleAr,
-                en: titleEn,
-                fr: titleFr,
-              },
-              buttonTexts: {
-                ar: "احصل على العرض الآن",
-                en: "Get Offer Now",
-                fr: "Obtenir l'Offre Maintenant",
-              },
-              createdAt: new Date().toISOString(),
-            };
-
-            // Add to Firebase
-            await window.firebaseAddDoc(
-              window.firebaseCollection(window.firebaseDB, "offers"),
-              newOffer
-            );
-
-            // Clear form
-            document.getElementById("offer-form").reset();
-
-            // Reset button
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-
-            // Show success message
-            showSuccessMessage("تم إضافة العرض بنجاح!");
+            // ✅ بدون صورة
+            await saveOffer(newOffer, submitBtn, originalText);
           }
         } catch (error) {
           console.error("Error adding offer:", error);
-          submitBtn.textContent = originalText;
-          submitBtn.disabled = false;
           showErrorMessage(
             "حدث خطأ أثناء إضافة العرض. تأكد من إعدادات Firebase."
           );
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
         }
+      }
+
+      // ✅ دالة حفظ العرض في Firebase
+      async function saveOffer(newOffer, submitBtn, originalText) {
+        try {
+          await window.firebaseAddDoc(
+            window.firebaseCollection(window.firebaseDB, "offers"),
+            newOffer
+          );
+
+          // ✅ تفريغ النموذج
+          document.getElementById("offer-form").reset();
+
+          // ✅ إرجاع الزر لحالته الأصلية
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+
+          // ✅ عرض رسالة النجاح
+          showSuccessMessage("تم إضافة العرض بنجاح!");
+
+          // ✅ إعادة تحميل العروض بعد الإضافة
+          await fetchOffers();
+        } catch (error) {
+          console.error("Error saving offer:", error);
+          showErrorMessage("فشل حفظ العرض في قاعدة البيانات.");
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        }
+      }
+
+      // ✅ دالة لجلب العروض من Firebase
+      async function fetchOffers() {
+        try {
+          const querySnapshot = await window.firebaseGetDocs(
+            window.firebaseCollection(window.firebaseDB, "offers")
+          );
+
+          const offers = [];
+          querySnapshot.forEach((doc) => {
+            offers.push(doc.data());
+          });
+
+          renderOffers(offers);
+        } catch (error) {
+          console.error("Error fetching offers:", error);
+        }
+      }
+
+      // ✅ دالة عرض العروض على الصفحة
+      function renderOffers(offers) {
+        const container = document.getElementById("offers-container");
+        if (!container) return;
+
+        container.innerHTML = "";
+        offers.forEach((offer) => {
+          const offerEl = document.createElement("div");
+          offerEl.className =
+            "offer-card bg-white shadow-md rounded-lg overflow-hidden p-3";
+          offerEl.innerHTML = `
+      <img src="${
+        offer.imageUrl || "placeholder.jpg"
+      }" alt="Offer Image" class="w-full h-40 object-cover rounded-md mb-3">
+      <h3 class="font-bold text-lg mb-1">${
+        offer.titles.ar || "عرض بدون عنوان"
+      }</h3>
+      <p class="text-sm text-gray-600 mb-2">${offer.details.ar || ""}</p>
+      <a href="${
+        offer.link
+      }" target="_blank" class="text-blue-600 hover:underline">
+        ${offer.buttonTexts.ar}
+      </a>
+    `;
+          container.appendChild(offerEl);
+        });
       }
 
       async function loadDashboardOffers() {
@@ -1073,19 +1116,21 @@
                     <div class="mb-6">
                         ${
                           offer.imageUrl
-                            ? `<img src="${offer.imageUrl}" class="w-full rounded" alt="${
+                            ? `<img src="${
+                                offer.imageUrl
+                              }" class="w-full rounded" alt="${
                                 offer.titles ? offer.titles.ar : offer.title
                               }" class="w-20 h-20 mx-auto object-cover rounded-lg" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                             <div class="w-20 h-20 mx-auto bg-[#D4AF37] rounded-lg flex items-center justify-center" style="display: none;">
+                              <div class="w-20 h-20 mx-auto bg-[#D4AF37] rounded-lg flex items-center justify-center" style="display: none;">
                                 <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                                 </svg>
-                             </div>`
+                              </div>`
                             : `<div class="w-20 h-20 mx-auto bg-[#D4AF37] rounded-lg flex items-center justify-center">
                                 <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                                 </svg>
-                             </div>`
+                              </div>`
                         }
                     </div>
                     <h3 class="text-2xl font-bold text-[#D4AF37] mb-4 text-center">${
@@ -1338,41 +1383,6 @@
           showHome();
         }
       });
-    </script>
-    <script>
-      (function () {
-        function c() {
-          var b = a.contentDocument || a.contentWindow.document;
-          if (b) {
-            var d = b.createElement("script");
-            d.innerHTML =
-              "window.__CF$cv$params={r:'98f9b63a708a536e',t:'MTc2MDY0MDMxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
-            b.getElementsByTagName("head")[0].appendChild(d);
-          }
-        }
-        if (document.body) {
-          var a = document.createElement("iframe");
-          a.height = 1;
-          a.width = 1;
-          a.style.position = "absolute";
-          a.style.top = 0;
-          a.style.left = 0;
-          a.style.border = "none";
-          a.style.visibility = "hidden";
-          document.body.appendChild(a);
-          if ("loading" !== document.readyState) c();
-          else if (window.addEventListener)
-            document.addEventListener("DOMContentLoaded", c);
-          else {
-            var e = document.onreadystatechange || function () {};
-            document.onreadystatechange = function (b) {
-              e(b);
-              "loading" !== document.readyState &&
-                ((document.onreadystatechange = e), c());
-            };
-          }
-        }
-      })();
     </script>
   </body>
 </html>
