@@ -334,12 +334,15 @@
             Get Started
           </button>
         </div>
+        <div class="mt-20 flex items-center justify-center">
+          <img src="./OIP.webp" alt="CAP-Image" class="rounded-lg" />
+        </div>
       </section>
 
       <!-- Offers Grid Section -->
       <section
         id="offers"
-        class="py-16 px-4 relative overflow-hidden"
+        class="pb-16 px-4 relative overflow-hidden"
         style="background-color: #f5f0e8"
       >
         <!-- Decorative rectangles -->
@@ -905,12 +908,12 @@
       // Dashboard functionality
       let dashboardOffers = [];
 
-      // ✅ تحميل العروض أول ما الصفحة تفتح
+      // تحميل العروض أول ما الصفحة تفتح
       document.addEventListener("DOMContentLoaded", async () => {
         await fetchOffers();
       });
 
-      // ✅ دالة إضافة عرض جديد
+      // دالة إضافة عرض جديد
       async function addOffer(event) {
         event.preventDefault();
 
@@ -988,7 +991,7 @@
         }
       }
 
-      // ✅ دالة حفظ العرض في Firebase
+      // دالة حفظ العرض في Firebase
       async function saveOffer(newOffer, submitBtn, originalText) {
         try {
           await window.firebaseAddDoc(
@@ -1016,7 +1019,7 @@
         }
       }
 
-      // ✅ دالة لجلب العروض من Firebase
+      // دالة لجلب العروض من Firebase
       async function fetchOffers() {
         try {
           const querySnapshot = await window.firebaseGetDocs(
@@ -1034,7 +1037,7 @@
         }
       }
 
-      // ✅ دالة عرض العروض على الصفحة
+      // دالة عرض العروض على الصفحة
       function renderOffers(offers) {
         const container = document.getElementById("offers-container");
         if (!container) return;
